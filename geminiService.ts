@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Modality, LiveServerMessage, Blob } from "@google/genai";
-import { AnalysisResponse, UserProfile, PresentationResponse, SupportedLanguage, LANGUAGE_NAMES } from "../types";
+import { AnalysisResponse, UserProfile, PresentationResponse, SupportedLanguage, LANGUAGE_NAMES } from "./types";
 
 const cleanJsonResponse = (text: string): string => {
   if (!text) return "{}";
