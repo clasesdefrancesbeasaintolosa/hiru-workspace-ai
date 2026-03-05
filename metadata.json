@@ -1,0 +1,8 @@
+{
+  "name": "HIRU Workspace IA",
+  "description": "Tu asistente estratégico para mejorar y refinar textos profesionales siguiendo el principio: La IA propone, la persona decide.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
