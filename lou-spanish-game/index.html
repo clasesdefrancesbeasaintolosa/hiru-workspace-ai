@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>¡Hola, Lou! — Aventure en Espagne</title>
+<style>
+:root{--p:#7c3aed;--p2:#ec4899;--bg:#f7f3ff;--card:#fff;--txt:#251b35;--mut:#70657c;--ok:#15803d;--bad:#b91c1c}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(160deg,#faf5ff,#fff1f7);color:var(--txt);min-height:100vh}
+button{font:inherit}.wrap{max-width:720px;margin:auto;padding:16px}.hero{text-align:center;padding:40px 12px 24px}.logo{font-size:70px}.hero h1{font-size:36px;margin:8px 0}.hero p{color:var(--mut)}
+.btn{border:0;border-radius:16px;padding:14px 18px;background:var(--p);color:white;font-weight:750;cursor:pointer;width:100%;box-shadow:0 8px 20px #7c3aed33}.btn.secondary{background:white;color:var(--txt);border:1px solid #ddd;box-shadow:none}
+.card{background:var(--card);border:1px solid #eadff4;border-radius:22px;padding:18px;box-shadow:0 10px 30px #54208012}.hidden{display:none!important}.top{display:flex;justify-content:space-between;gap:8px;align-items:center}.chips{display:flex;gap:7px;flex-wrap:wrap}.chip{background:#f1e9ff;padding:7px 10px;border-radius:999px;font-size:14px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.mission{min-height:120px;text-align:left;border:1px solid #e5d9ee;border-radius:18px;padding:15px;background:white}.mission.locked{opacity:.45}.mission strong{display:block;margin-top:8px}.progress{height:10px;background:#eee4f7;border-radius:999px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--p),var(--p2));width:0}
+.answer{display:block;width:100%;text-align:left;padding:14px;margin:10px 0;border:1px solid #ded4e8;background:white;border-radius:14px}.answer.correct{border-color:var(--ok);background:#ecfdf3}.answer.wrong{border-color:var(--bad);background:#fff1f2}
+.audio{margin:12px 0}.feedback{min-height:26px;font-weight:700}.small{font-size:14px;color:var(--mut)}.center{text-align:center}.reward{font-size:70px}.screen{animation:fade .22s ease}@keyframes fade{from{opacity:.4;transform:translateY(5px)}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.hero h1{font-size:30px}.wrap{padding:12px}}
+</style>
+</head><body><main class="wrap">
+<section id="home" class="screen">
+ <div class="hero"><div class="logo">🇪🇸✨</div><h1>¡Hola, Lou!</h1><p>Une aventure en Espagne pour apprendre l'espagnol en jouant.</p></div>
+ <div class="card"><p><b>20 missions · 100 mini-défis · voix espagnole</b></p><p class="small">Handball, gymnastique, mode, musique et vie quotidienne.</p><button class="btn" id="start">Commencer l'aventure</button></div>
+</section>
+<section id="map" class="screen hidden">
+ <div class="top"><div><h2>Carte des missions</h2><p class="small">Débloque-les une par une.</p></div><div class="chips"><span class="chip">⭐ <span id="stars">0</span></span><span class="chip">🔥 <span id="streak">0</span></span></div></div>
+ <div class="progress"><div id="globalBar" class="bar"></div></div><p class="small"><span id="doneCount">0</span>/20 missions terminées</p>
+ <div id="missionGrid" class="grid"></div>
+</section>
+<section id="play" class="screen hidden">
+ <div class="top"><button class="btn secondary" id="back" style="width:auto">← Carte</button><div class="chips"><span class="chip">❤️ <span id="lives">3</span></span><span class="chip">⭐ <span id="score">0</span></span></div></div>
+ <h2 id="missionTitle"></h2><p class="small">Mini-mission <span id="qnum">1</span>/5</p><div class="progress"><div id="missionBar" class="bar"></div></div>
+ <div class="card" style="margin-top:16px"><p id="instruction" class="small"></p><h3 id="prompt"></h3><button id="listen" class="btn secondary audio">🔊 Écouter en espagnol</button><div id="answers"></div><p id="feedback" class="feedback" aria-live="polite"></p><button id="next" class="btn hidden">Continuer</button></div>
+</section>
+<section id="complete" class="screen hidden center">
+ <div class="card"><div class="reward" id="reward">👟</div><h2>Mission accomplie !</h2><p id="completeText"></p><button id="continueMap" class="btn">Voir la prochaine mission</button></div>
+</section>
+<section id="final" class="screen hidden center">
+ <div class="hero"><div class="logo">🏆🇪🇸</div><h1>¡Enhorabuena, Lou!</h1><p>Tu as terminé les 20 missions et tu peux déjà te débrouiller dans de nombreuses situations en Espagne.</p></div>
+ <button id="replay" class="btn">Rejouer depuis le début</button>
+</section>
+</main>
+<script>
+const missions=[];
+const raw=[["Llegada a España","✈️"],["Mi habitación","🏠"],["Primer día de instituto","🏫"],["De compras","🛍️"],["En la cafetería","☕"],["Entrenamiento de balonmano","🤾"],["Clase de gimnasia","🤸"],["Música y K-Pop","🎤"],["Moverse por la ciudad","🚌"],["Salida con amigos","🎉"],["En el supermercado","🛒"],["En casa de una amiga","🏡"],["Un día de lluvia","🌧️"],["En la playa","🏖️"],["Visita al médico","🩺"],["Fiesta de cumpleaños","🎂"],["Viaje en tren","🚆"],["Día de moda","👗"],["Torneo deportivo","🏆"],["Gran final en Madrid","🌟"]];
+const bank=[
+["Écoute et choisis.","Hola, me llamo Marta. ¿Cómo te llamas?",["Me llamo Lou.","Tengo catorce años.","Soy de Francia.","Muy bien."],0],
+["Choisis la bonne phrase.","J’ai quatorze ans.",["Soy catorce años.","Tengo catorce años.","Estoy catorce años.","Hay catorce años."],1],
+["Écoute et réponds.","¿De dónde eres?",["Soy francesa, de las Ardenas.","Tengo una hermana.","Me gusta el deporte.","Estoy cansada."],0],
+["Complète.","Me gusta mucho…",["el balonmano","catorce años","de Francia","me llamo"],0],
+["Choisis la présentation correcte.","Hola…",["Me llamo Lou. Soy francesa y tengo catorce años.","Tengo Lou y soy Francia.","Soy Lou años.","Me llamo Francia."],0]
+];
+raw.forEach((m,idx)=>missions.push({title:m[0],icon:m[1],questions:bank.map((q,i)=>({instruction:q[0],prompt:idx===0?q[1]:["¿Qué haces primero?","Hoy tenemos una misión especial.","¿Estás preparada?","Me gusta mucho esta actividad.","Hemos terminado la misión."][i],answers:idx===0?q[2]:[["Primero leo las instrucciones.","Tengo catorce.","Soy una mesa.","Ayer azul."],["Aujourd’hui, nous avons une mission spéciale.","Demain, je reste à la maison.","Je n’aime pas le sport.","Le train est rouge."],["Sí, estoy preparada.","Tengo preparada.","Soy preparar.","Hay preparada."],["actividad","catorce","ayer","allí"],["Nous avons terminé la mission.","Nous commençons demain.","Je suis fatiguée.","Le bus est en retard."]][i],correct:idx===0?q[3]:0}))}));
+let state=JSON.parse(localStorage.getItem("louGame")||'{"unlocked":1,"completed":[],"stars":0,"streak":0}');
+let mi=0,qi=0,score=0,lives=3,answered=false;
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem("louGame",JSON.stringify(state))}
+function show(id){["home","map","play","complete","final"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+function renderMap(){show("map");$("stars").textContent=state.stars;$("streak").textContent=state.streak;$("doneCount").textContent=state.completed.length;$("globalBar").style.width=(state.completed.length/20*100)+"%";const g=$("missionGrid");g.innerHTML="";missions.forEach((m,i)=>{const b=document.createElement("button");const locked=i+1>state.unlocked;b.className="mission"+(locked?" locked":"");b.disabled=locked;b.innerHTML=`<span style="font-size:32px">${locked?"🔒":m.icon}</span><strong>${i+1}. ${m.title}</strong><span class="small">${state.completed.includes(i)?"Terminée ✅":locked?"Verrouillée":"5 mini-missions"}</span>`;b.onclick=()=>startMission(i);g.appendChild(b)})}
+function startMission(i){mi=i;qi=0;score=0;lives=3;show("play");renderQuestion()}
+function renderQuestion(){answered=false;const m=missions[mi],q=m.questions[qi];$("missionTitle").textContent=`${m.icon} ${m.title}`;$("qnum").textContent=qi+1;$("missionBar").style.width=((qi+1)/5*100)+"%";$("instruction").textContent=q.instruction;$("prompt").textContent=q.prompt;$("score").textContent=score;$("lives").textContent=lives;$("feedback").textContent="";$("next").classList.add("hidden");const a=$("answers");a.innerHTML="";q.answers.forEach((x,i)=>{const b=document.createElement("button");b.className="answer";b.textContent=x;b.onclick=()=>choose(i,b);a.appendChild(b)})}
+function choose(i,b){if(answered)return;answered=true;const q=missions[mi].questions[qi];[...$("answers").children].forEach((x,j)=>{x.disabled=true;if(j===q.correct)x.classList.add("correct")});if(i===q.correct){score+=10;$("feedback").textContent="Bravo ! +10 ⭐";state.streak++}else{lives=Math.max(0,lives-1);b.classList.add("wrong");$("feedback").textContent="Presque ! Regarde la bonne réponse.";state.streak=0}$("score").textContent=score;$("lives").textContent=lives;$("next").classList.remove("hidden")}
+function next(){if(qi<4){qi++;renderQuestion()}else{finishMission()}}
+function finishMission(){if(!state.completed.includes(mi)){state.completed.push(mi);state.stars+=score;state.unlocked=Math.min(20,Math.max(state.unlocked,mi+2));save()}if(state.completed.length===20){show("final");return}$("reward").textContent=["👟","🎒","🎧","👗","✨","🤾","🤸","🎤","🚌","🎉","🛒","🏡","☂️","🕶️","💖","🎂","🚆","👜","🏆","🌟"][mi];$("completeText").textContent=`Tu as gagné ${score} étoiles et débloqué la mission suivante.`;show("complete")}
+function speak(){if(!("speechSynthesis" in window)){$("feedback").textContent="La voix n'est pas disponible dans ce navigateur.";return}const u=new SpeechSynthesisUtterance(missions[mi].questions[qi].prompt);u.lang="es-ES";u.rate=.86;const vs=speechSynthesis.getVoices();u.voice=vs.find(v=>v.lang.toLowerCase()==="es-es")||vs.find(v=>v.lang.startsWith("es"))||null;speechSynthesis.cancel();speechSynthesis.speak(u)}
+$("start").onclick=renderMap;$("back").onclick=renderMap;$("next").onclick=next;$("listen").onclick=speak;$("continueMap").onclick=renderMap;$("replay").onclick=()=>{localStorage.removeItem("louGame");location.reload()};
+</script></body></html>
